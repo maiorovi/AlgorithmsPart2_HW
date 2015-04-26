@@ -10,6 +10,9 @@ public class WordNet {
     private SAP sap;
 
     public WordNet(String synsets, String hypernyms) {
+        if (synsets == null || hypernyms == null) {
+            throw new NullPointerException();
+        }
         int amount = readSynsets(synsets);
         Digraph graph = readHypernums(hypernyms, amount);
         sap = new SAP(graph);
@@ -68,10 +71,21 @@ public class WordNet {
     }
 
     public boolean isNoun(String word) {
+        if (word == null) {
+            throw new NullPointerException();
+        }
         return wordToIdMap.containsKey(word);
     }
 
     public int distance(String nounA, String nounB) {
+        if (nounA == null || nounB == null) {
+            throw new NullPointerException();
+        }
+
+        if (!wordToIdMap.containsKey(nounA) || !wordToIdMap.containsKey(nounB)) {
+            throw new IllegalArgumentException();
+        }
+
         Integer firstId = wordToIdMap.get(nounA);
         Integer secondId = wordToIdMap.get(nounB);
 
@@ -79,6 +93,14 @@ public class WordNet {
     }
 
     public String sap(String nounA, String nounB) {
+        if (nounA == null || nounB == null) {
+            throw new NullPointerException();
+        }
+
+        if (!wordToIdMap.containsKey(nounA) || !wordToIdMap.containsKey(nounB)) {
+            throw new IllegalArgumentException();
+        }
+
         Integer firstId = wordToIdMap.get(nounA);
         Integer secondId = wordToIdMap.get(nounB);
 

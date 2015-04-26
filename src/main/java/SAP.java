@@ -44,6 +44,12 @@ public class SAP {
         return findAncestor();
     }
 
+    private void verifyArguments(Iterable<Integer> v, Iterable<Integer> w) {
+        if (v == null || w == null) {
+            throw new NullPointerException();
+        }
+    }
+
     private int findAncestor() {
         int ancestor = -1;
         int result = -1;
@@ -65,6 +71,10 @@ public class SAP {
     }
 
     private void precalc(int v, int w) {
+        if (v < 0 || w < 0 || v > graph.vertex() - 1 || w > graph.vertex() - 1) {
+            throw new IndexOutOfBoundsException();
+        }
+
         vcache.clear();
         wcache.clear();
 
@@ -81,12 +91,14 @@ public class SAP {
     }
 
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
+        verifyArguments(v,w);
         precalc(v,w);
 
         return findDistance();
     }
 
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
+        verifyArguments(v,w);
         precalc(v,w);
 
         return findAncestor();
@@ -132,6 +144,10 @@ public class SAP {
             LinkedList<Integer> queue = new LinkedList<Integer>();
 
             for (int v : vert) {
+                if (v < 0 || v > graph.vertex()) {
+                    throw new IndexOutOfBoundsException();
+                }
+
                 queue.addFirst(v);
                 marked[v] = true;
                 distanceTo[v] = 0;
