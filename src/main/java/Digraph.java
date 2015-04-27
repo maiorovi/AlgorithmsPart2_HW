@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Digraph {
@@ -17,11 +18,28 @@ public class Digraph {
         }
     }
 
+    public Digraph(In in) {
+        this(in.readInt());
+        this.E = in.readInt();
+
+        for (int i = 0; i < E; i++) {
+            addEdge(in.readInt(), in.readInt());
+        }
+    }
+
+    public Digraph(Digraph digraph) {
+        this.V = digraph.V();
+        for (int i = 0; i < digraph.E; i++) {
+            for (int q : digraph.adj(i))
+                adjList[i].add(q);
+        }
+    }
+
     public void addEdge(int v, int w) {
         adjList[v].add(w);
     }
 
-    public int vertex() {
+    public int V() {
         return V;
     }
 

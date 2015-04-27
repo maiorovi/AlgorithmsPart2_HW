@@ -4,12 +4,12 @@ import java.util.LinkedList;
 public class SAP {
 
     private BFSCache vcache, wcache;
-    private Digraph graph;
+    private final Digraph graph;
 
     public SAP(Digraph graph) {
-        this.graph = graph;
-        vcache = new BFSCache(graph.vertex());
-        wcache = new BFSCache(graph.vertex());
+        this.graph = new Digraph(graph);
+        vcache = new BFSCache(graph.V());
+        wcache = new BFSCache(graph.V());
     }
 
 
@@ -71,7 +71,7 @@ public class SAP {
     }
 
     private void precalc(int v, int w) {
-        if (v < 0 || w < 0 || v > graph.vertex() - 1 || w > graph.vertex() - 1) {
+        if (v < 0 || w < 0 || v > graph.V() - 1 || w > graph.V() - 1) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -105,29 +105,40 @@ public class SAP {
     }
 
     public static void main(String[] args) {
-
+        In in = new In(args[0]);
+        Digraph G = new Digraph(in);
+        SAP sap = new SAP(G);
+        while (!StdIn.isEmpty()) {
+            int v = StdIn.readInt();
+            int w = StdIn.readInt();
+            int length   = sap.length(v, w);
+            int ancestor = sap.ancestor(v, w);
+            StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+        }
     }
 
     private class BFSCache implements Iterable<Integer> {
         private boolean[] marked;
         private int[] distanceTo;
         private LinkedList<Integer> path = new LinkedList<Integer>();
-        private int V;
 
         public BFSCache(int V) {
-            this.V = V;
             marked = new boolean[V];
             distanceTo = new int[V];
+
+            for (int i = 0; i < V; i++) {
+                distanceTo[i] = -1;
+            }
         }
 
         public void bfs(int v) {
             LinkedList<Integer> queue = new LinkedList<Integer>();
-            queue.addFirst(v);
+            queue.addLast(v);
             marked[v] = true;
             distanceTo[v] = 0;
             path.addLast(v);
 
-            while (queue.isEmpty()) {
+            while (!queue.isEmpty()) {
                 Integer current = queue.removeFirst();
                 for (int p : graph.adj(current)) {
                     if (!marked[p]) {
@@ -144,17 +155,17 @@ public class SAP {
             LinkedList<Integer> queue = new LinkedList<Integer>();
 
             for (int v : vert) {
-                if (v < 0 || v > graph.vertex()) {
+                if (v < 0 || v > graph.V()) {
                     throw new IndexOutOfBoundsException();
                 }
 
-                queue.addFirst(v);
+                queue.addLast(v);
                 marked[v] = true;
                 distanceTo[v] = 0;
                 path.addLast(v);
             }
 
-            while (queue.isEmpty()) {
+            while (!queue.isEmpty()) {
                 Integer current = queue.removeFirst();
                 for (int p : graph.adj(current)) {
                     if (!marked[p]) {
@@ -168,7 +179,7 @@ public class SAP {
         }
 
         public void clear() {
-            while (path.isEmpty()) {
+            while (!path.isEmpty()) {
                 int ind = path.removeFirst();
                 marked[ind] = false;
                 distanceTo[ind] = -1;
@@ -183,7 +194,7 @@ public class SAP {
         }
 
         public boolean canReach(int v) {
-            return distanceTo[v] != 0;
+            return marked[v];
         }
 
         @Override

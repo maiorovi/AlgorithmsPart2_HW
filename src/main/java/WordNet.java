@@ -45,7 +45,6 @@ public class WordNet {
         String[] result = line.split(",");
         String id = result[0];
         String[] words = result[1].split("\\s+");
-        String description = result[2];
 
         idToSynsetsMap.put(Integer.parseInt(id), line);
 
