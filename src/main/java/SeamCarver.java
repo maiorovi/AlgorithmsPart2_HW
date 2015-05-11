@@ -1,5 +1,5 @@
 public class SeamCarver {
-    public static final double BORDER_ENERGY = 195075.0;
+    private static final double BORDER_ENERGY = 195075.0;
     private Picture picture;
     private double[][] energy;
 
@@ -106,7 +106,7 @@ public class SeamCarver {
         return restoreHorSeam(lastPixel, edgeTo);
     }
 
-    public int[] restoreHorSeam(int lastPixel, int[] edgeTo) {
+    private int[] restoreHorSeam(int lastPixel, int[] edgeTo) {
         int[] path = new int[width()];
         int currentPixel = lastPixel;
 
@@ -189,16 +189,16 @@ public class SeamCarver {
         Picture updatedPicture = new Picture(width(), height()-1);
         double[][] updatedPicEnergy = new double[width()][height() - 1];
 
-        for(int col = 0; col < width() - 1; col++) {
+        for(int col = 0; col < width(); col++) {
 
             for(int row = 0; row < seam[col]; row++) {
                 updatedPicture.set(col, row, picture.get(col,row));
-                updatedPicEnergy[col][row] = energy(col, row);
+                updatedPicEnergy[col][row] = energy[col][row];
             }
 
-            for(int row = seam[col] + 1; col < height(); col++) {
+            for(int row = seam[col] + 1; row < height(); row++) {
                 updatedPicture.set(col, row - 1, picture.get(col,row));
-                updatedPicEnergy[col][row - 1] = energy(col, row);
+                updatedPicEnergy[col][row - 1] = energy[col][row];
             }
         }
 
@@ -220,17 +220,17 @@ public class SeamCarver {
         }
 
         Picture updatedPicture = new Picture(width() - 1, height());
-        double[][] updatedPicEnergy = new double[width()][height()];
+        double[][] updatedPicEnergy = new double[width() - 1][height()];
 
         for(int row = 0; row < height(); row++) {
 
             for (int col = 0; col < seam[row]; col++) {
-                updatedPicEnergy[col][row] = energy(col, row);
+                updatedPicEnergy[col][row] = energy[col][row];
                 updatedPicture.set(col, row, picture.get(col, row));
             }
 
             for (int col = seam[row] + 1; col < width(); col++) {
-                updatedPicEnergy[col - 1][row] = energy(col, row);
+                updatedPicEnergy[col - 1][row] = energy[col][row];
                 updatedPicture.set(col - 1, row, picture.get(col, row));
             }
         }
