@@ -9,6 +9,7 @@ public class BaseballElimination {
     private final int SCHEDULE_PARSE_POSITION = 4;
 
     private Map<String, TeamInfo> statistic = new HashMap<String, TeamInfo>();
+    private TeamInfo leaderTeam;
 
     private int numberOfTeams;
 
@@ -37,6 +38,9 @@ public class BaseballElimination {
         teamInfo.setLeft(Integer.parseInt(result[LEFT]));
         teamInfo.setSchedule(parseSchedule(result));
         teamInfo.setId(id);
+
+        if (id == 0)
+            leaderTeam = teamInfo;
 
         statistic.put(result[NAME], teamInfo);
     }
@@ -78,7 +82,19 @@ public class BaseballElimination {
     }
 
     public boolean isEliminated(String team) {
-        return true;
+        if (isSimplyEliminated(team)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isSimplyEliminated(String team) {
+        int wins = statistic.get(team).wins;
+        int left = statistic.get(team).left;
+        int leaderWins = leaderTeam.getWins();
+
+        return wins + left < leaderWins;
     }
 
     public Iterable<String> certificateOfElimination(String team) {
@@ -150,5 +166,8 @@ public class BaseballElimination {
         System.out.println(baseball.remaining("New_York"));
         System.out.println(baseball.numberOfTeams());
         System.out.println(baseball.against("Atlanta", "Montreal"));
+        System.out.println(baseball.isEliminated("Philadelphia"));
+        System.out.println(baseball.isEliminated("New_York"));
+        System.out.println(baseball.isEliminated("Montreal"));
     }
 }
