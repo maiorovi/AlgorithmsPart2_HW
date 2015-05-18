@@ -12,7 +12,7 @@ public class FlowNetwork {
         vertex = v;
 
         for (int i = 0; i < v; i++) {
-            adjList[v] = new ArrayList<FlowEdge>();
+            adjList[i] = new ArrayList<FlowEdge>();
         }
     }
 

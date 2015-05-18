@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +10,9 @@ public class BaseballElimination {
     private final int SCHEDULE_PARSE_POSITION = 4;
 
     private Map<String, TeamInfo> statistic = new HashMap<String, TeamInfo>();
+    private Map<String, ArrayList<String>> certificates = new HashMap<String, ArrayList<String>>();
     private TeamInfo leaderTeam;
+    private int[][] againstTable;
 
     private int numberOfTeams;
 
@@ -20,8 +23,10 @@ public class BaseballElimination {
     private void processInputFile(String filename) {
         In in = new In(filename);
         int id = 0;
-        if (in.hasNextLine())
+        if (in.hasNextLine()) {
             numberOfTeams = Integer.parseInt(in.readLine());
+            againstTable = new int[numberOfTeams][numberOfTeams];
+        }
         while(in.hasNextLine()) {
             String line = in.readLine();
             createTeamInfoAndPutItToMap(line, id++);
@@ -36,7 +41,7 @@ public class BaseballElimination {
         teamInfo.setTeamName(result[NAME]);
         teamInfo.setLosses(Integer.parseInt(result[LOSSES]));
         teamInfo.setLeft(Integer.parseInt(result[LEFT]));
-        teamInfo.setSchedule(parseSchedule(result));
+        teamInfo.setSchedule(parseSchedule(result, id));
         teamInfo.setId(id);
 
         if (id == 0)
@@ -45,12 +50,12 @@ public class BaseballElimination {
         statistic.put(result[NAME], teamInfo);
     }
 
-    private int[] parseSchedule(String[] result) {
+    private int[] parseSchedule(String[] result, int id) {
         int length =  result.length - SCHEDULE_PARSE_POSITION;
         int[] schedule = new int[length];
 
         for (int i = SCHEDULE_PARSE_POSITION; i < result.length; i++) {
-            schedule[i-SCHEDULE_PARSE_POSITION] = Integer.parseInt(result[i]);
+            againstTable[id][i-SCHEDULE_PARSE_POSITION] = Integer.parseInt(result[i]);
         }
 
         return schedule;
@@ -82,23 +87,62 @@ public class BaseballElimination {
     }
 
     public boolean isEliminated(String team) {
+        FlowNetwork flowNetwork = null;
         if (isSimplyEliminated(team)) {
             return true;
+        } else {
+            flowNetwork = buildFlowNetwork("");
         }
 
         return false;
     }
 
+    private FlowNetwork buildFlowNetwork(String team) {
+        int numberOfGamesToPlay = numberOfTeams * (numberOfTeams - 1) / 2;
+        int graphSize = 2 + numberOfTeams + numberOfGamesToPlay;
+        FlowNetwork flowNetwork = new FlowNetwork(graphSize);
+
+        //connect zero with games
+        for (int i = 0, k = 1; i < numberOfTeams - 1; i++) {
+            for (int j = i + 1; j < numberOfTeams; j++) {
+                flowNetwork.addEdge(new FlowEdge(0, k++, againstTable[i][j]));
+            }
+        }
+
+        //connect games with teams
+        for (int i = numberOfGamesToPlay + 1, z = 1; i < graphSize - 1; i++ ) {
+            for (int j = i - numberOfGamesToPlay, q = i + 1 ; j < numberOfTeams; j++) {
+                flowNetwork.addEdge(new FlowEdge(z, i, Double.POSITIVE_INFINITY));
+                flowNetwork.addEdge(new FlowEdge(z++, q++, Double.POSITIVE_INFINITY));
+            }
+        }
+
+        //connect teams to target
+        for (int i = numberOfGamesToPlay + 1; i < graphSize - 1; i++ ) {
+            flowNetwork.addEdge(new FlowEdge(i,graphSize -1, 0));
+        }
+
+        return flowNetwork;
+    }
     private boolean isSimplyEliminated(String team) {
         int wins = statistic.get(team).wins;
         int left = statistic.get(team).left;
-        int leaderWins = leaderTeam.getWins();
+        int totalGames = wins + left;
 
-        return wins + left < leaderWins;
+        for (String teamName : teams()) {
+            ArrayList<String> teams = new ArrayList<String>();
+            if (statistic.get(teamName).getWins() > totalGames)
+                teams.add(teamName);
+            if (!teams.isEmpty()) {
+                certificates.put(team, teams);
+                return true;
+            }
+        }
+        return false;
     }
 
     public Iterable<String> certificateOfElimination(String team) {
-        return null;
+        return certificates.get(team);
     }
 
     private class TeamInfo {
