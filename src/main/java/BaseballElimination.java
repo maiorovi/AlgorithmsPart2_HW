@@ -10,6 +10,7 @@ public class BaseballElimination {
     private final int SCHEDULE_PARSE_POSITION = 4;
 
     private Map<String, TeamInfo> statistic = new HashMap<String, TeamInfo>();
+    private Map<Integer, String> idToTeamName = new HashMap<>();
     private Map<String, ArrayList<String>> certificates = new HashMap<String, ArrayList<String>>();
     private TeamInfo leaderTeam;
     private int[][] againstTable;
@@ -48,6 +49,7 @@ public class BaseballElimination {
             leaderTeam = teamInfo;
 
         statistic.put(result[NAME], teamInfo);
+        idToTeamName.put(id, teamInfo.getTeamName());
     }
 
     private int[] parseSchedule(String[] result, int id) {
@@ -121,8 +123,8 @@ public class BaseballElimination {
         }
 
         //connect teams to target
-        for (int i = numberOfGamesToPlay + 1; i < graphSize - 1; i++ ) {
-            flowNetwork.addEdge(new FlowEdge(i,graphSize -1, wins + left));
+        for (int i = numberOfGamesToPlay + 1, q = 0; i < graphSize - 1; i++ ) {
+            flowNetwork.addEdge(new FlowEdge(i,graphSize -1, wins + left - statistic.get(idToTeamName.get(q++)).wins));
         }
 
         FordFulkerson fordFulkerson = new FordFulkerson(flowNetwork, 0, graphSize - 1);
@@ -212,7 +214,7 @@ public class BaseballElimination {
     }
 
     public static void main(String[] args) {
-        BaseballElimination baseball = new BaseballElimination("teams4.txt");
+        BaseballElimination baseball = new BaseballElimination("teams12.txt");
         System.out.println(baseball.wins("Atlanta"));
         System.out.println(baseball.losses("Philadelphia"));
         System.out.println(baseball.remaining("New_York"));
@@ -220,6 +222,7 @@ public class BaseballElimination {
         System.out.println(baseball.against("Atlanta", "Montreal"));
         System.out.println(baseball.isEliminated("Philadelphia"));
         System.out.println(baseball.isEliminated("New_York"));
-        System.out.println(baseball.isEliminated("Montreal"));
+        System.out.println(baseball.isEliminated("Detroit"));
+//        System.out.println(baseball.isEliminated("Japan"));
     }
 }

@@ -39,7 +39,7 @@ public class FordFulkerson {
 
         while(!queue.isEmpty()) {
 
-            int v = queue.getFirst();
+            int v = queue.removeFirst();
 
             for (FlowEdge edge : flowNetwork.adj(v)) {
                 int w = edge.other(v);
