@@ -87,25 +87,28 @@ public class BaseballElimination {
     }
 
     public boolean isEliminated(String team) {
-        FlowNetwork flowNetwork = null;
+        boolean result = true;
         if (isSimplyEliminated(team)) {
-            return true;
+            result = true;
         } else {
-            flowNetwork = buildFlowNetwork("");
+            result = resolveElimination(team);
         }
 
-        return false;
+        return result;
     }
 
-    private FlowNetwork buildFlowNetwork(String team) {
+    private Boolean resolveElimination(String team) {
         int numberOfGamesToPlay = numberOfTeams * (numberOfTeams - 1) / 2;
         int graphSize = 2 + numberOfTeams + numberOfGamesToPlay;
         FlowNetwork flowNetwork = new FlowNetwork(graphSize);
-
+        int wins = statistic.get(team).wins;
+        int left = statistic.get(team).left;
+        int maxflow = 0;
         //connect zero with games
         for (int i = 0, k = 1; i < numberOfTeams - 1; i++) {
             for (int j = i + 1; j < numberOfTeams; j++) {
                 flowNetwork.addEdge(new FlowEdge(0, k++, againstTable[i][j]));
+                maxflow += againstTable[i][j];
             }
         }
 
@@ -119,10 +122,15 @@ public class BaseballElimination {
 
         //connect teams to target
         for (int i = numberOfGamesToPlay + 1; i < graphSize - 1; i++ ) {
-            flowNetwork.addEdge(new FlowEdge(i,graphSize -1, 0));
+            flowNetwork.addEdge(new FlowEdge(i,graphSize -1, wins + left));
         }
 
-        return flowNetwork;
+        FordFulkerson fordFulkerson = new FordFulkerson(flowNetwork, 0, graphSize - 1);
+        if (maxflow > fordFulkerson.value()) {
+            return true;
+        }
+
+        return false;
     }
     private boolean isSimplyEliminated(String team) {
         int wins = statistic.get(team).wins;
