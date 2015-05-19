@@ -12,10 +12,13 @@ public class BaseballElimination {
     private Map<String, TeamInfo> statistic = new HashMap<String, TeamInfo>();
     private Map<Integer, String> idToTeamName = new HashMap<>();
     private Map<String, ArrayList<String>> certificates = new HashMap<String, ArrayList<String>>();
+    private Map<String,  Boolean> eliminatedCache = new HashMap<>();
     private TeamInfo leaderTeam;
     private int[][] againstTable;
+    private FordFulkerson fordFulkerson;
 
     private int numberOfTeams;
+    private int numberOfGamesToPlay;
 
     public BaseballElimination(String filename) {
         processInputFile(filename);
@@ -90,17 +93,24 @@ public class BaseballElimination {
 
     public boolean isEliminated(String team) {
         boolean result = true;
+
+        if (eliminatedCache.containsKey(team)) {
+            return eliminatedCache.get(team);
+        }
+
         if (isSimplyEliminated(team)) {
             result = true;
         } else {
             result = resolveElimination(team);
         }
 
+        eliminatedCache.put(team, result);
+
         return result;
     }
 
     private Boolean resolveElimination(String team) {
-        int numberOfGamesToPlay = numberOfTeams * (numberOfTeams - 1) / 2;
+        numberOfGamesToPlay = numberOfTeams * (numberOfTeams - 1) / 2;
         int graphSize = 2 + numberOfTeams + numberOfGamesToPlay;
         FlowNetwork flowNetwork = new FlowNetwork(graphSize);
         int wins = statistic.get(team).wins;
@@ -127,7 +137,7 @@ public class BaseballElimination {
             flowNetwork.addEdge(new FlowEdge(i,graphSize -1, wins + left - statistic.get(idToTeamName.get(q++)).wins));
         }
 
-        FordFulkerson fordFulkerson = new FordFulkerson(flowNetwork, 0, graphSize - 1);
+        fordFulkerson = new FordFulkerson(flowNetwork, 0, graphSize - 1);
         if (maxflow > fordFulkerson.value()) {
             return true;
         }
@@ -152,7 +162,28 @@ public class BaseballElimination {
     }
 
     public Iterable<String> certificateOfElimination(String team) {
-        return certificates.get(team);
+        if (certificates.containsKey(team)) {
+            return certificates.get(team);
+        }
+
+        if (isSimplyEliminated(team)) {
+            return certificates.get(team);
+        }
+
+        if (resolveElimination(team)) {
+            ArrayList<String> eliminationList = new ArrayList<>();
+
+            for(String itTeam: teams()) {
+                if(fordFulkerson.inCut(statistic.get(itTeam).getId() + numberOfGamesToPlay + 1)) {
+                    eliminationList.add(itTeam);
+                }
+            }
+
+            certificates.put(team, eliminationList);
+            return eliminationList;
+        }
+
+        return null;
     }
 
     private class TeamInfo {
@@ -214,15 +245,20 @@ public class BaseballElimination {
     }
 
     public static void main(String[] args) {
-        BaseballElimination baseball = new BaseballElimination("teams12.txt");
-        System.out.println(baseball.wins("Atlanta"));
-        System.out.println(baseball.losses("Philadelphia"));
-        System.out.println(baseball.remaining("New_York"));
-        System.out.println(baseball.numberOfTeams());
-        System.out.println(baseball.against("Atlanta", "Montreal"));
-        System.out.println(baseball.isEliminated("Philadelphia"));
-        System.out.println(baseball.isEliminated("New_York"));
-        System.out.println(baseball.isEliminated("Detroit"));
-//        System.out.println(baseball.isEliminated("Japan"));
+        BaseballElimination division = new BaseballElimination("baseball-testing\\teams5c.txt");
+
+        for (String team : division.teams()) {
+            if (division.isEliminated(team)) {
+                StdOut.print(team + " is eliminated by the subset R = { ");
+                for (String t : division.certificateOfElimination(team)) {
+                    StdOut.print(t + " ");
+                }
+                StdOut.println("}");
+            }
+            else {
+                StdOut.println(team + " is not eliminated");
+            }
+        }
     }
+
 }
