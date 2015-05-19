@@ -32,7 +32,7 @@ public class BaseballElimination {
             againstTable = new int[numberOfTeams][numberOfTeams];
         }
         while(in.hasNextLine()) {
-            String line = in.readLine();
+            String line = in.readLine().trim();
             createTeamInfoAndPutItToMap(line, id++);
         }
     }
@@ -92,9 +92,10 @@ public class BaseballElimination {
     public int against(String team1, String team2) {
         isTeamInDivision(team1);
         isTeamInDivision(team2);
+        int team1Id = statistic.get(team1).getId();
+                int team2Id = statistic.get(team2).getId();
 
-        int enemyId = statistic.get(team2).getId();
-        return statistic.get(team1).getSchedule()[enemyId];
+        return againstTable[team1Id][team2Id];
     }
 
     public boolean isEliminated(String team) {
@@ -261,8 +262,7 @@ public class BaseballElimination {
     }
 
     public static void main(String[] args) {
-        BaseballElimination division = new BaseballElimination("baseball-testing\\teams12-allgames.txt");
-
+        BaseballElimination division = new BaseballElimination("baseball-testing\\teams48.txt");
         for (String team : division.teams()) {
             if (division.isEliminated(team)) {
                 StdOut.print(team + " is eliminated by the subset R = { ");
