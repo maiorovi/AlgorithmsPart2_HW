@@ -75,24 +75,32 @@ public class BaseballElimination {
     }
 
     public int wins(String team) {
+        isTeamInDivision(team);
         return statistic.get(team).getWins();
     }
 
     public int losses(String team) {
+        isTeamInDivision(team);
         return statistic.get(team).losses;
     }
 
     public int remaining(String team) {
+        isTeamInDivision(team);
         return statistic.get(team).left;
     }
 
     public int against(String team1, String team2) {
+        isTeamInDivision(team1);
+        isTeamInDivision(team2);
+
         int enemyId = statistic.get(team2).getId();
         return statistic.get(team1).getSchedule()[enemyId];
     }
 
     public boolean isEliminated(String team) {
         boolean result = true;
+
+        isTeamInDivision(team);
 
         if (eliminatedCache.containsKey(team)) {
             return eliminatedCache.get(team);
@@ -162,6 +170,8 @@ public class BaseballElimination {
     }
 
     public Iterable<String> certificateOfElimination(String team) {
+        isTeamInDivision(team);
+
         if (certificates.containsKey(team)) {
             return certificates.get(team);
         }
@@ -184,6 +194,12 @@ public class BaseballElimination {
         }
 
         return null;
+    }
+
+    private void isTeamInDivision(String team) {
+        if (!statistic.containsKey(team)) {
+            throw new IllegalArgumentException();
+        }
     }
 
     private class TeamInfo {
@@ -245,7 +261,7 @@ public class BaseballElimination {
     }
 
     public static void main(String[] args) {
-        BaseballElimination division = new BaseballElimination("baseball-testing\\teams5c.txt");
+        BaseballElimination division = new BaseballElimination("baseball-testing\\teams12-allgames.txt");
 
         for (String team : division.teams()) {
             if (division.isEliminated(team)) {
