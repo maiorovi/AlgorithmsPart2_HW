@@ -101,7 +101,7 @@ public class BoggleSolver {
     private class BoggleTrie<T> {
         private int R = 26;
         private static final int OFFSET = 65;
-        private Node root;
+        private Node root = new Node();
 
         private class Node<T> {
             private T val;
