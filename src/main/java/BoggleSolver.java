@@ -1,13 +1,11 @@
 import java.util.*;
 
 public class BoggleSolver {
-//    private HashSet<String> dictionary;
-    BoggleTrie<Integer> dictionary;
+    private BoggleTrie<Integer> dictionary;
     private int width;
     private int height;
 
     public BoggleSolver(String[] dictionary) {
-//        this.dictionary = new HashSet<String>();
         this.dictionary = new BoggleTrie<>();
 
         for (int i = 0; i < dictionary.length;i++) {
@@ -41,7 +39,7 @@ public class BoggleSolver {
 
         char letter = board.getLetter(i,j);
 
-        prefix += (letter == 'Q' ? "Qu" : String.valueOf(letter));
+        prefix += (letter == 'Q' ? "QU" : String.valueOf(letter));
 
         if (prefix.length() > 2 && dictionary.contains(prefix))
             words.add(prefix);
@@ -79,20 +77,20 @@ public class BoggleSolver {
     }
 
     public int scoreOf(String word) {
-        if (word.length() <= 2) {
-            return 0;
-        } else
-        if (word.length() < 4) {
-            return 1;
-        } else
-        if (word.length() == 6) {
-            return 2;
-        } else
-        if(word.length() == 7) {
-            return 5;
-        } else
-        if(word.length() >= 8) {
-            return 11;
+        if (dictionary.contains(word)) {
+            if (word.length() <= 2) {
+                return 0;
+            } else if (word.length() <= 4) {
+                return 1;
+            }else if (word.length() == 5) {
+                return 2;
+            } else if (word.length() == 6) {
+                return 3;
+            } else if (word.length() == 7) {
+                return 5;
+            } else if (word.length() >= 8) {
+                return 11;
+            }
         }
 
         return 0;
