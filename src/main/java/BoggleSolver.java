@@ -1,75 +1,106 @@
 import java.util.*;
 
 public class BoggleSolver {
-    private HashSet<String> dictionary;
+//    private HashSet<String> dictionary;
+    BoggleTrie<Integer> dictionary;
     private int width;
     private int height;
 
-    public BoggleSolver(String[] dictionary){
-        this.dictionary = new HashSet<String>();
-        Collections.addAll(this.dictionary, dictionary);
+    public BoggleSolver(String[] dictionary) {
+//        this.dictionary = new HashSet<String>();
+        this.dictionary = new BoggleTrie<>();
+
+        for (int i = 0; i < dictionary.length;i++) {
+            this.dictionary.put(dictionary[i], 1);
+        }
     }
 
-    public Iterable<String> getAllValidWords(BoggleBoard board){
+    public Iterable<String> getAllValidWords(BoggleBoard board) {
         height = board.rows();
         width = board.cols();
-        ArrayList<String> validWords = new ArrayList<String>();
+        TreeSet<String> validWords = new TreeSet<String>();
 
-        Iterable<String> words = dfs(board);
-
-        for(String word : words) {
-            if (dictionary.contains(word)) {
-                validWords.add(word);
+        for (int i = 0; i < height; i++) {
+            for(int j = 0; j < width; j++) {
+                searchWords(board, i, j, validWords);
             }
         }
 
         return validWords;
     }
 
-    private Iterable<String> dfs(BoggleBoard board) {
-        int start = 0;
+    private void searchWords(BoggleBoard board, int i, int j, TreeSet<String> words) {
+        boolean[][] visited = new boolean[board.rows()][board.cols()];
+        dfs(board, i, j, words, visited, "");
 
-        return null;
     }
 
-    //x - row, y - column
-    private Iterable<Character> adj(int x, int y,BoggleBoard board) {
-        ArrayList list = new ArrayList();
+    private void dfs(BoggleBoard board, int i, int j, TreeSet<String> words,boolean[][] visited, String prefix) {
+        if(visited[i][j])
+            return;
 
-        if (x != 0 && y != 0)
-            list.add(board.getLetter(x-1, y-1));
+        char letter = board.getLetter(i,j);
 
-        if(x != 0)
-            list.add(board.getLetter(x-1, y));
+        prefix += (letter == 'Q' ? "Qu" : String.valueOf(letter));
 
-        if(x != 0 && y!= width - 1)
-            list.add(board.getLetter(x-1, y+1));
+        if (prefix.length() > 2 && dictionary.contains(prefix))
+            words.add(prefix);
 
-        if( y != 0)
-            list.add(board.getLetter(x, y - 1));
+        if (!dictionary.isPrefix(prefix))
+            return;
 
-        if (y != width - 1)
-            list.add(board.getLetter(x, y + 1));
+        visited[i][j] = true;
 
-
-        if ( x != height - 1 && y != 0)
-            list.add(board.getLetter(x+1, y-1));
-
-        if (x != height -1)
-            list.add(board.getLetter(x+1, y));
-
-        if(x != height - 1 && y != width - 1)
-            list.add(board.getLetter(x+1, y+1));
-
-        return list;
+        if (i > 0) {
+            dfs(board, i - 1, j, words, visited, prefix);
+            if (j > 0) {
+                dfs(board, i - 1, j - 1, words, visited, prefix);
+            }
+            if (j < board.cols() - 1) {
+                dfs(board, i - 1, j + 1, words, visited, prefix);
+            }
+        }
+        if (j > 0) {
+            dfs(board, i, j - 1, words, visited, prefix);
+        }
+        if (j < board.cols() - 1) {
+            dfs(board, i, j + 1, words, visited, prefix);
+        }
+        if (i < board.rows() - 1) {
+            if (j > 0) {
+                dfs(board, i + 1, j - 1, words, visited, prefix);
+            }
+            if (j < board.cols() - 1) {
+                dfs(board, i + 1, j + 1, words, visited, prefix);
+            }
+            dfs(board, i + 1, j, words, visited, prefix);
+        }
+        visited[i][j] = false;
     }
 
     public int scoreOf(String word) {
+        if (word.length() <= 2) {
+            return 0;
+        } else
+        if (word.length() < 4) {
+            return 1;
+        } else
+        if (word.length() == 6) {
+            return 2;
+        } else
+        if(word.length() == 7) {
+            return 5;
+        } else
+        if(word.length() >= 8) {
+            return 11;
+        }
+
         return 0;
     }
 
     private class BoggleTrie<T> {
         private int R = 26;
+        private static final int OFFSET = 65;
         private Node root;
 
         private class Node<T> {
@@ -91,11 +122,11 @@ public class BoggleSolver {
             if (key.length() == d)
                 return x;
             char c = key.charAt(d);
-            return get(x, key, d + 1);
+            return get(x.ref[c-OFFSET], key, d + 1);
         }
 
         public void put(String key, T value) {
-
+            put(root, key, value, 0);
         }
 
         private Node put(Node x, String key, T value, int d) {
@@ -108,26 +139,36 @@ public class BoggleSolver {
             }
 
             char c = key.charAt(d);
-            x.ref[c] = put(x.ref[c], key,value,d+1);
+            x.ref[c-OFFSET] = put(x.ref[c-OFFSET], key,value,d+1);
             return x;
         }
 
+        public boolean contains(String key) {
+            T val =  get(key);
 
+            if (val != null)
+                return true;
 
+            return false;
+        }
+
+        public boolean isPrefix(String prefix) {
+            return get(root, prefix, 0) != null;
+        }
     }
 
     public static void main(String[] args) {
         In in = new In(args[0]);
         String[] dictionary = in.readAllStrings();
         BoggleSolver solver = new BoggleSolver(dictionary);
-//        BoggleBoard board = new BoggleBoard(args[1]);
-//        int score = 0;
-//        for (String word : solver.getAllValidWords(board))
-//        {
-//            StdOut.println(word);
-//            score += solver.scoreOf(word);
-//        }
-//        StdOut.println("Score = " + score);
+        BoggleBoard board = new BoggleBoard(args[1]);
+        int score = 0;
+        for (String word : solver.getAllValidWords(board))
+        {
+            StdOut.println(word);
+            score += solver.scoreOf(word);
+        }
+        StdOut.println("Score = " + score);
     }
 }
 
