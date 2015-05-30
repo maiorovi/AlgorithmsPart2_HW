@@ -1,40 +1,60 @@
+import com.sun.org.apache.xpath.internal.SourceTree;
+
 import java.util.Arrays;
+import java.util.Comparator;
 
 public class CircularSuffixArray {
 
     private int lenght;
     private String s;
-    private int[] index;
+    private Integer[] index;
 
-    public CircularSuffixArray(String s) {
+    public CircularSuffixArray(final String s) {
         lenght = s.length();
-        index = new int[lenght];
+        index = new Integer[lenght];
         this.s = s;
 
         for(int i = 0; i <lenght; i++) {
-
+            index[i] = i;
         }
 
+        Arrays.sort(index, new Comparator<Integer>(){
+
+            @Override
+            public int compare(Integer firstChar, Integer secondChar) {
+                int fChar = firstChar; int sChar = secondChar;
+                for(int i = 0; i < s.length(); i++) {
+                    if (fChar > s.length() - 1)
+                        fChar = 0;
+                    if (sChar > s.length() - 1)
+                        sChar = 0;
+
+                    if (s.charAt(fChar) - s.charAt(sChar) < 0) {
+                        return -1;
+                    }
+                    if (s.charAt(fChar) - s.charAt(sChar) > 0) {
+                        return 1;
+                    }
+
+                    fChar++;
+                    sChar++;
+                }
+
+                return 0;
+            }
+        });
+
+        printArray(index);
+
     }
 
-    private String rotate(String s) {
-        StringBuilder builder = new StringBuilder();
-        char first = s.charAt(0);
-        String q = new String(s.toCharArray(), 1, s.length() - 1).concat(String.valueOf(first));
-
-        return q;
-    }
-
-
-
-    private void printArray(String arr[]) {
+    private void printArray(Integer arr[]) {
         for(int i = 0; i < arr.length; i++) {
             System.out.println(arr[i]);
         }
     }
 
 
-               // returns index of ith sorted suffix
     public static void main(String[] args) {
         CircularSuffixArray arr  = new CircularSuffixArray("ABRACADABRA!");
     }
