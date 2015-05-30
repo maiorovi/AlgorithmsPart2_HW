@@ -69,12 +69,11 @@ public class BurrowsWheeler {
     }
 
     private static StringBuilder readFromInputString() {
-        BinaryIn binaryIn = new BinaryIn();
         StringBuilder inputData = new StringBuilder("3ARD!RCAAAABB");
 
-        while(!binaryIn.isEmpty()) {
-            inputData.append(binaryIn.readChar());
-        }
+//        while(!BinaryStdIn.isEmpty()) {
+//            inputData.append(BinaryStdIn.readChar());
+//        }
 
         return inputData;
     }
