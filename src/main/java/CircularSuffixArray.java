@@ -1,5 +1,3 @@
-import com.sun.org.apache.xpath.internal.SourceTree;
-
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -43,17 +41,15 @@ public class CircularSuffixArray {
                 return 0;
             }
         });
-
-        printArray(index);
-
     }
 
-    private void printArray(Integer arr[]) {
-        for(int i = 0; i < arr.length; i++) {
-            System.out.println(arr[i]);
-        }
+    public int length() {
+        return s.length();
     }
 
+    public int index(int i) {
+        return index[i];
+    }
 
     public static void main(String[] args) {
         CircularSuffixArray arr  = new CircularSuffixArray("ABRACADABRA!");
