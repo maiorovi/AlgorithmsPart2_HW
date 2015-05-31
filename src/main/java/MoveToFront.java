@@ -3,32 +3,34 @@ import java.util.LinkedList;
 
 public class MoveToFront {
     private static final int ALBPHABET_SIZE = 255;
+    private static final int CHAR_BITS = 8;
     // apply move-to-front encoding, reading from standard input and writing to standard output
     public static void encode() {
         LinkedList<Character> alphabet = constructAlphabet();
 
         while(!BinaryStdIn.isEmpty()) {
-            int currentChar = (int) BinaryStdIn.readChar();
-            Iterator<Character> it =  alphabet.iterator();
+            char currentChar = BinaryStdIn.readChar();
+            Iterator<Character> it =  alphabet.listIterator();
             int alphabetPos = 0;
 
             while(it.hasNext()) {
-                if (it.next().equals(currentChar)) {
-                 BinaryStdOut.write(alphabetPos);
+                if (it.next().equals(Character.valueOf(currentChar))) {
+                 BinaryStdOut.write(alphabetPos, CHAR_BITS);
                  Character toFront = alphabet.remove(alphabetPos);
-                 alphabet.addFirst(toFront);
+                 alphabet.add(0, toFront);
                  break;
                 }
                 alphabetPos++;
             }
-            BinaryStdOut.close();
         }
+        BinaryStdOut.flush();
+        BinaryStdOut.close();
     }
 
     private static LinkedList<Character> constructAlphabet() {
         LinkedList<Character> alphabet = new LinkedList();
 
-        for (int i = 0; i < ALBPHABET_SIZE; i++) {
+        for (int i = 0; i <= ALBPHABET_SIZE; i++) {
             alphabet.add((char) i);
         }
 
@@ -40,25 +42,24 @@ public class MoveToFront {
         LinkedList<Character> alphabet = constructAlphabet();
 
         while(!BinaryStdIn.isEmpty()) {
-            int currentChar = BinaryStdIn.readInt();
-            Iterator<Character> it = alphabet.iterator();
-//            int alphabetPosition = 0;
-            while(it.hasNext()) {
-                if (it.next().equals((int)currentChar)) {
-                    BinaryStdOut.write(alphabet.get(currentChar));
+            int currentChar = BinaryStdIn.readChar();
+                    BinaryStdOut.write(alphabet.get(currentChar), CHAR_BITS);
+                BinaryStdOut.flush();
                     Character toFront = alphabet.remove(currentChar);
                     alphabet.addFirst(toFront);
-                }
-//                alphabetPosition++;
-            }
-            BinaryStdOut.close();
         }
+        BinaryStdOut.flush();
+        BinaryStdOut.close();
     }
 
     // if args[0] is '-', apply move-to-front encoding
     // if args[0] is '+', apply move-to-front decoding
     public static void main(String[] args) {
-        MoveToFront mtf = new MoveToFront();
-        mtf.encode();
+        String action = args[0];
+        if (action.equals("-")) {
+            MoveToFront.encode();
+        } else if (action.equals("+")) {
+            MoveToFront.decode();
+        }
     }
 }

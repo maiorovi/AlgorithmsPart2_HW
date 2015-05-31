@@ -8,6 +8,8 @@ public class CircularSuffixArray {
     private Integer[] index;
 
     public CircularSuffixArray(final String s) {
+        if (s == null)
+            throw new NullPointerException();
         lenght = s.length();
         index = new Integer[lenght];
         this.s = s;
@@ -48,6 +50,9 @@ public class CircularSuffixArray {
     }
 
     public int index(int i) {
+        if (i < 0 || i > index.length - 1)
+            throw new IndexOutOfBoundsException();
+
         return index[i];
     }
 

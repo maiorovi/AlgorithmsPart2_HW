@@ -5,14 +5,14 @@ import java.util.Map;
 
 public class BurrowsWheeler {
 
+    private static final int CHAR_BITS = 8;
     // apply Burrows-Wheeler encoding, reading from standard input and writing to standard output
     public static void encode() {
-//        StringBuilder inputString = new StringBuilder("ABRACADABRA!");
-
         StringBuilder inputString = readFromInputString();
 
         int length = inputString.length();
         String str = inputString.toString();
+        int start = -1;
 
         CircularSuffixArray cSuffixArray = new CircularSuffixArray(str);
         StringBuilder output = new StringBuilder();
@@ -22,27 +22,28 @@ public class BurrowsWheeler {
 
             if (offset == 0) {
                 output.append(inputString.charAt(inputString.length() - 1));
-                output = new StringBuilder(String.valueOf(z).concat(output.toString()));
+                start = z;
                 continue;
             }
 
             output.append(inputString.charAt(offset - 1));
         }
-        BinaryStdOut.write(output.toString());
+        BinaryStdOut.write(start, 32);
+        BinaryStdOut.write(output.toString(), CHAR_BITS);
         BinaryStdOut.flush();
         BinaryStdOut.close();
     }
 
     // apply Burrows-Wheeler decoding, reading from standard input and writing to standard output
     public static void decode() {
+        int start = BinaryStdIn.readInt();
         StringBuilder inputData = readFromInputString();
+//        int start = Integer.parseInt(String.valueOf(inputData.charAt(0)));
 
-        int start = Integer.parseInt(String.valueOf(inputData.charAt(0)));
+        char[] t = new char[inputData.length()];
 
-        char[] t = new char[inputData.length() - 1];
-
-        for(int i = 0; i < inputData.length() - 1; i++) {
-            t[i] = inputData.charAt(i+1);
+        for(int i = 0; i < inputData.length(); i++) {
+            t[i] = inputData.charAt(i);
         }
 
         int next[] = new int[t.length];
@@ -69,11 +70,11 @@ public class BurrowsWheeler {
     }
 
     private static StringBuilder readFromInputString() {
-        StringBuilder inputData = new StringBuilder("3ARD!RCAAAABB");
+        StringBuilder inputData = new StringBuilder();
 
-//        while(!BinaryStdIn.isEmpty()) {
-//            inputData.append(BinaryStdIn.readChar());
-//        }
+        while(!BinaryStdIn.isEmpty()) {
+            inputData.append(BinaryStdIn.readChar());
+        }
 
         return inputData;
     }
@@ -81,6 +82,11 @@ public class BurrowsWheeler {
     // if args[0] is '-', apply Burrows-Wheeler encoding
     // if args[0] is '+', apply Burrows-Wheeler decoding
     public static void main(String[] args) {
-        BurrowsWheeler.decode();
+        String action = args[0];
+        if (action.equals("-")) {
+            BurrowsWheeler.encode();
+        } else if (action.equals("+")) {
+            BurrowsWheeler.decode();
+        }
     }
 }
